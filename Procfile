@@ -1,1 +1,1 @@
-web: rest-demo-dd
+web: rest-demo
