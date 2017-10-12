@@ -11,7 +11,7 @@ var players Players
 func main() {
 	setupMockedData()
 	router := NewRouter()
-	log.Fatal(http.ListenAndServe(":5050", router))
+	log.Fatal(http.ListenAndServe(":"+port(), router))
 }
 
 func setupMockedData() {
