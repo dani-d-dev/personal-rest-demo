@@ -12,38 +12,38 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Main page goes here..."))
 }
 
-func GetPeople(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(people)
+func PlayersList(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(players)
 }
 
-func GetPerson(w http.ResponseWriter, r *http.Request) {
+func PlayerShow(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	for _, item := range people {
+	for _, item := range players {
 		if item.ID == params["id"] {
 			json.NewEncoder(w).Encode(item)
 			return
 		}
 	}
 
-	json.NewEncoder(w).Encode(&Person{})
+	json.NewEncoder(w).Encode(&Player{})
 }
 
-func CreatePerson(w http.ResponseWriter, r *http.Request) {
+func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	var person Person
-	_ = json.NewDecoder(r.Body).Decode(&person)
-	person.ID = params["id"]
-	people = append(people, person)
-	json.NewEncoder(w).Encode(people)
+	var player Player
+	_ = json.NewDecoder(r.Body).Decode(&player)
+	player.ID = params["id"]
+	players = append(players, player)
+	json.NewEncoder(w).Encode(players)
 }
 
-func DeletePerson(w http.ResponseWriter, r *http.Request) {
+func PlayerDelete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	for index, item := range people {
+	for index, item := range players {
 		if item.ID == params["id"] {
-			people = append(people[:index], people[index+1:]...)
+			players = append(players[:index], players[index+1:]...)
 			break
 		}
-		json.NewEncoder(w).Encode(people)
+		json.NewEncoder(w).Encode(players)
 	}
 }
