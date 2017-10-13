@@ -19,7 +19,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func PlayersList(w http.ResponseWriter, r *http.Request) {
 
 	var results Players
-	err := collection.Find(nil).All(&results)
+	err := collection.Find(nil).Sort("-_id").All(&results)
 
 	if err != nil {
 		ErrorWithJSON(w, "Error finding record", http.StatusNotFound)
@@ -31,25 +31,30 @@ func PlayersList(w http.ResponseWriter, r *http.Request) {
 
 func PlayerShow(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["id"]
+	player_id := params["id"]
 
-	var player Player
-	err := collection.Find(bson.M{"id": id}).One(&player)
-
-	if err != nil {
-		ErrorWithJSON(w, "Error finding record", http.StatusNotFound)
+	if !bson.IsObjectIdHex(player_id) {
+		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
 		return
 	}
 
-	ResponseWithJSON(w, player, 200)
+	oid := bson.ObjectIdHex(player_id)
+
+	var results Player
+	err := collection.FindId(oid).One(&results)
+
+	if err != nil {
+		ErrorWithJSON(w, "Player not found", http.StatusNotFound)
+		return
+	}
+
+	ResponseWithJSON(w, results, 200)
 }
 
-func PlayerAdd(w http.ResponseWriter, r *http.Request) {
-
-	decoder := json.NewDecoder(r.Body)
+func PlayerInsert(w http.ResponseWriter, r *http.Request) {
 
 	var player Player
-	err := decoder.Decode(&player)
+	err := json.NewDecoder(r.Body).Decode(&player)
 
 	if err != nil {
 		ErrorWithJSON(w, "Cannot insert record on db", http.StatusNotAcceptable)
@@ -58,12 +63,47 @@ func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	err = collection.Update(bson.M{"id": player.ID}, &player)
+	err = collection.Insert(player)
+	if err != nil {
+		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+		log.Println("Insertion failed with error :", err)
+		return
+	}
+
+	ResponseWithJSON(w, player, 200)
+}
+
+func PlayerUpdate(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	player_id := params["id"]
+
+	if !bson.IsObjectIdHex(player_id) {
+		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
+		return
+	}
+
+	oid := bson.ObjectIdHex(player_id)
+
+	var player Player
+	err := json.NewDecoder(r.Body).Decode(&player)
+
+	if err != nil {
+		ErrorWithJSON(w, "Failed decoding json into object", http.StatusNotAcceptable)
+		return
+	}
+
+	defer r.Body.Close()
+
+	document := bson.M{"_id":oid}
+	change := bson.M{"$set":player}
+	err = collection.Update(document, change)
+
 	if err != nil {
 		switch err {
 		default:
 			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
-			log.Println("Failed update book: ", err)
+			log.Println("Failed updating player: ", err)
 			return
 		case mgo.ErrNotFound:
 			ErrorWithJSON(w, "Record not found", http.StatusNotFound)
@@ -76,18 +116,24 @@ func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 
 func PlayerDelete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id := params["id"]
+	player_id := params["id"]
 
-	err := collection.Remove(bson.M{"id":id})
+	if !bson.IsObjectIdHex(player_id) {
+		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
+		return
+	}
+
+	oid := bson.ObjectIdHex(player_id)
+	err := collection.RemoveId(oid)
 
 	if err != nil {
 		switch err {
 		default:
 			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
-			log.Println("Failed delete book: ", err)
+			log.Println("Failed removing player: ", err)
 			return
 		case mgo.ErrNotFound:
-			ErrorWithJSON(w, "Book not found", http.StatusNotFound)
+			ErrorWithJSON(w, "Player not found", http.StatusNotFound)
 			return
 		}
 	}
@@ -97,7 +143,7 @@ func PlayerDelete(w http.ResponseWriter, r *http.Request) {
 
 func ResponseWithJSON(w http.ResponseWriter, result interface{}, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(200)
+	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(result)
 }
 

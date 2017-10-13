@@ -12,15 +12,8 @@ var players Players
 var collection = getSession().DB("godata").C("user")
 
 func main() {
-
-	setupMockedData()
 	router := NewRouter()
 	log.Fatal(http.ListenAndServe(":"+port(), router))
-}
-
-func setupMockedData() {
-	players = append(players, Player{"1", "Ma", "Long", "The Dragon", "-"})
-	players = append(players, Player{"2", "Timo", "Boll", "The Nice Guy", "-"})
 }
 
 func port() string {
@@ -34,8 +27,19 @@ func port() string {
 	return port
 }
 
+func mongoURL() string {
+	url := os.Getenv("MONGO_URL")
+
+	if url == "" {
+		log.Fatal("$PORT must be set")
+		return ""
+	}
+
+	return url
+}
+
 func getSession() *mgo.Session {
-	sess, err := mgo.Dial("mongodb://mlab-dani:dani1234@ds117935.mlab.com:17935/godata")
+	sess, err := mgo.Dial(mongoURL())
 	if err != nil {
 		fmt.Printf("Can't connect to mongo, go error %v\n", err)
 		os.Exit(1)
@@ -43,5 +47,7 @@ func getSession() *mgo.Session {
 
 	return sess
 }
+
+//mongodb://mlab-dani:dani1234@ds117935.mlab.com:17935/godata
 
 

@@ -47,10 +47,16 @@ var routes = Routes{
 		PlayerShow,
 	},
 	Route{
-		"PlayerAdd",
+		"PlayerInsert",
 		"POST",
 		"/api/v1/player",
-		PlayerAdd,
+		PlayerInsert,
+	},
+	Route{
+		"PlayerUpdate",
+		"PUT",
+		"/api/v1/player/{id}",
+		PlayerUpdate,
 	},
 	Route{
 		"PlayerDelete",
