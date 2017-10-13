@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"log"
+	"fmt"
 )
 
 // Handlers
@@ -13,7 +15,17 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func PlayersList(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(players)
+
+	var results Players
+	err := collection.Find(nil).All(&results)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(results)
 }
 
 func PlayerShow(w http.ResponseWriter, r *http.Request) {
@@ -29,12 +41,24 @@ func PlayerShow(w http.ResponseWriter, r *http.Request) {
 }
 
 func PlayerAdd(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+
+	decoder := json.NewDecoder(r.Body)
+
 	var player Player
-	_ = json.NewDecoder(r.Body).Decode(&player)
-	player.ID = params["id"]
-	players = append(players, player)
-	json.NewEncoder(w).Encode(players)
+	err := decoder.Decode(&player)
+
+	if err != nil {
+		panic(err)
+		fmt.Printf("Post handler failed")
+	}
+
+	defer r.Body.Close()
+
+	collection.Insert(player)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(player)
 }
 
 func PlayerDelete(w http.ResponseWriter, r *http.Request) {

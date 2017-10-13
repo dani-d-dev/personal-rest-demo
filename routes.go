@@ -49,7 +49,7 @@ var routes = Routes{
 	Route{
 		"PlayerAdd",
 		"POST",
-		"/api/v1/player/{id}",
+		"/api/v1/player",
 		PlayerAdd,
 	},
 	Route{
