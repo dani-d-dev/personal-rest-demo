@@ -13,7 +13,11 @@
 			"path": "github.com/gorilla/mux",
 			"revision": "bdd5a5a1b0b489d297b73eb62b5f6328df198bfc",
 			"revisionTime": "2017-10-08T21:49:13Z"
+		},
+		{
+			"path": "gopkg.in/mgo.v2",
+			"revision": ""
 		}
 	],
-	"rootPath": "github.com/heroku/rest-demo"
+	"rootPath": "github.com/rest-demo-dd"
 }
