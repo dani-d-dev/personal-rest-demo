@@ -46,6 +46,8 @@ func PlayerShow(w http.ResponseWriter, r *http.Request) {
 
 func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 
+	params := mux.Vars(r)
+	id := params["id"]
 	decoder := json.NewDecoder(r.Body)
 
 	var player Player
@@ -58,7 +60,18 @@ func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	collection.Insert(player)
+	err = collection.Update(bson.M{"id": id}, &player)
+	if err != nil {
+		switch err {
+		default:
+			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+			log.Println("Failed update book: ", err)
+			return
+		case mgo.ErrNotFound:
+			ErrorWithJSON(w, "Record not found", http.StatusNotFound)
+			return
+		}
+	}
 
 	ResponseWithJSON(w, player, 200)
 }
