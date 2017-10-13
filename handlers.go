@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"log"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
+	"log"
+	"gopkg.in/mgo.v2"
 )
 
 // Handlers
@@ -20,24 +22,26 @@ func PlayersList(w http.ResponseWriter, r *http.Request) {
 	err := collection.Find(nil).All(&results)
 
 	if err != nil {
-		log.Fatal(err)
+		ErrorWithJSON(w, "Error finding record", http.StatusNotFound)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(results)
+	ResponseWithJSON(w, results, 200)
 }
 
 func PlayerShow(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	for _, item := range players {
-		if item.ID == params["id"] {
-			json.NewEncoder(w).Encode(item)
-			return
-		}
+	id := params["id"]
+
+	var player Player
+	err := collection.Find(bson.M{"id": id}).One(&player)
+
+	if err != nil {
+		ErrorWithJSON(w, "Error finding record", http.StatusNotFound)
+		return
 	}
 
-	json.NewEncoder(w).Encode(&Player{})
+	ResponseWithJSON(w, player, 200)
 }
 
 func PlayerAdd(w http.ResponseWriter, r *http.Request) {
@@ -48,26 +52,46 @@ func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&player)
 
 	if err != nil {
-		panic(err)
-		fmt.Printf("Post handler failed")
+		ErrorWithJSON(w, "Cannot insert record on db", http.StatusNotAcceptable)
+		return
 	}
 
 	defer r.Body.Close()
 
 	collection.Insert(player)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(player)
+	ResponseWithJSON(w, player, 200)
 }
 
 func PlayerDelete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	for index, item := range players {
-		if item.ID == params["id"] {
-			players = append(players[:index], players[index+1:]...)
-			break
+	id := params["id"]
+
+	err := collection.Remove(bson.M{"id":id})
+
+	if err != nil {
+		switch err {
+		default:
+			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+			log.Println("Failed delete book: ", err)
+			return
+		case mgo.ErrNotFound:
+			ErrorWithJSON(w, "Book not found", http.StatusNotFound)
+			return
 		}
-		json.NewEncoder(w).Encode(players)
 	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func ResponseWithJSON(w http.ResponseWriter, result interface{}, code int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(result)
+}
+
+func ErrorWithJSON(w http.ResponseWriter, message string, code int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(code)
+	fmt.Fprintf(w, "{message: %q}", message)
 }
