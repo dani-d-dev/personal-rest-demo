@@ -46,8 +46,6 @@ func PlayerShow(w http.ResponseWriter, r *http.Request) {
 
 func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 
-	params := mux.Vars(r)
-	id := params["id"]
 	decoder := json.NewDecoder(r.Body)
 
 	var player Player
@@ -60,7 +58,7 @@ func PlayerAdd(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	err = collection.Update(bson.M{"id": id}, &player)
+	err = collection.Update(bson.M{"id": player.ID}, &player)
 	if err != nil {
 		switch err {
 		default:
