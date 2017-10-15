@@ -8,8 +8,8 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-var players Players
-var collection = getSession().DB("godata").C("user")
+var playerCollection = getSession().DB("godata").C("user")
+var matchCollection = getSession().DB("godata").C("match")
 
 func main() {
 	router := NewRouter()

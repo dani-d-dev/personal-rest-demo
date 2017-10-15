@@ -64,4 +64,28 @@ var routes = Routes{
 		"/api/v1/player/{id}",
 		PlayerDelete,
 	},
+	Route{
+		"MatchList",
+		"GET",
+		"/api/v1/match/all",
+		MatchList,
+	},
+	Route{
+		"MatchShow",
+		"GET",
+		"/api/v1/match/{id}",
+		MatchShow,
+	},
+	Route{
+		"MatchInsert",
+		"POST",
+		"/api/v1/match",
+		MatchInsert,
+	},
+	Route{
+		"MatchDelete",
+		"DELETE",
+		"/api/v1/match/{id}",
+		MatchDelete,
+	},
 }
