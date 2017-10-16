@@ -6,6 +6,7 @@ import (
 )
 
 type Player struct {
+	ID bson.ObjectId	`json:"id" bson:"_id,omitempty"`
 	Firstname string   	`json:"first_name,omitempty"`
 	Lastname  string   	`json:"last_name,omitempty"`
 	NickName  string   	`json:"nick_name,omitempty"`
