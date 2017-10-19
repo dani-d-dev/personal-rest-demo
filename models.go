@@ -21,11 +21,7 @@ type Match struct {
 	Endtime  time.Time 	`json:"end_time"`
 	Player1 string 		`json:"player_1"`
 	Player2 string 		`json:"player_2"`
-	Games []Game		`json:"games"`
-}
-
-type Game struct {
-	result [2]int		`json:"result"`
+	Games []int			`json:"games"`
 }
 
 type matches []Match
