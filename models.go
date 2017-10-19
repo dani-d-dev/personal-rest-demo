@@ -21,7 +21,7 @@ type Match struct {
 	Endtime  time.Time 	`json:"end_time"`
 	Player1 string 		`json:"player_1"`
 	Player2 string 		`json:"player_2"`
-	Results []int		`json:results`
+	Results []int		`json:"results"`
 }
 
 type matches []Match
