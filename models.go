@@ -25,7 +25,7 @@ type Match struct {
 }
 
 type Game struct {
-	result [2]int
+	result [2]int		`json:"result"`
 }
 
 type matches []Match
