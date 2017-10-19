@@ -19,8 +19,8 @@ type Match struct {
 	ID bson.ObjectId	`json:"id" bson:"_id,omitempty"`
 	Startime  time.Time `json:"start_time"`
 	Endtime  time.Time 	`json:"end_time"`
-	Winner string 		`json:"winner"`
-	Loser string 		`json:"loser"`
+	Player1 string 		`json:"player_1"`
+	Player2 string 		`json:"player_2"`
 	Results []int		`json:results`
 }
 
