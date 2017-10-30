@@ -12,11 +12,13 @@ var playerCollection = getSession().DB("godata").C("user")
 var matchCollection = getSession().DB("godata").C("match")
 
 func main() {
+
 	router := NewRouter()
 	log.Fatal(http.ListenAndServe(":"+port(), router))
 }
 
 func port() string {
+
 	port := os.Getenv("PORT")
 
 	if port == "" {
@@ -32,7 +34,7 @@ func mongoURL() string {
 	url := os.Getenv("MONGO_URL")
 
 	if url == "" {
-		log.Fatal("$PORT must be set")
+		log.Fatal("$MONGO_URL must be set")
 		return ""
 	}
 
