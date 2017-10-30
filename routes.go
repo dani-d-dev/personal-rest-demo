@@ -88,4 +88,10 @@ var routes = Routes{
 		"/api/v1/match/{id}",
 		MatchDelete,
 	},
+	Route{
+		"Login",
+		"POST",
+		"api/v1/login",
+		Login,
+	},
 }

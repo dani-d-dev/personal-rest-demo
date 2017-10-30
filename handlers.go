@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/mux"
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
-	"log"
 	"gopkg.in/mgo.v2"
+	"log"
 )
 
 // Handlers

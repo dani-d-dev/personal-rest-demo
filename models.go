@@ -25,3 +25,13 @@ type Match struct {
 }
 
 type matches []Match
+
+
+type Provider struct {
+	Platform string		`json:"platform"`
+	Token string		`json:"token"`
+}
+
+type FBUser struct {
+	 FirstName string	`json:"first_name"`
+}
