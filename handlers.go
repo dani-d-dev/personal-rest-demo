@@ -198,6 +198,11 @@ func MatchInsert(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
+	// Pre-calculate winner & looser
+	winner_id, loser_id := CalculateScore(match.Player1, match.Player2, match.Games)
+	match.Winner = winner_id
+	match.Loser = loser_id
+
 	err = matchCollection.Insert(match)
 	if err != nil {
 		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
@@ -206,6 +211,35 @@ func MatchInsert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ResponseWithJSON(w, match, http.StatusOK)
+}
+
+// Get winner and looser tuple id's given a game array
+
+func CalculateScore(player_id_1 string, player_id_2 string, games []int) (string, string) {
+
+	var player1_victories = 0
+	var player2_victories = 0
+
+	for i := 0; i < len(games) + 1; i++ {
+		if i % 2 == 0 {
+			if i > 0 {
+				var p1 = games[i-2]
+				var p2 = games[i-1]
+				if p1 > p2 {
+					player1_victories +=1
+				} else {
+					player2_victories +=1
+				}
+
+				fmt.Printf("[Player 1: %d || Player 2: %d]\n", p1, p2)
+			}
+		}
+	}
+
+	if player1_victories > player2_victories {
+		return player_id_1, player_id_2
+	}
+	return player_id_2, player_id_1
 }
 
 // TODO : MatchUpdate
