@@ -8,6 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"log"
+	fb "github.com/huandu/facebook"
 )
 
 // Handlers
@@ -269,6 +270,35 @@ func MatchDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+
+	var provider Provider
+	err := json.NewDecoder(r.Body).Decode(&provider)
+
+	if err != nil {
+		ErrorWithJSON(w, "Error while parsing provider data", http.StatusNotAcceptable)
+		return
+	}
+
+	res, err := fb.Get("/me", fb.Params{
+		"fields": "first_name, last_name, picture",
+		"access_token": provider.Token,
+	})
+
+	if err != nil {
+		ErrorWithJSON(w, "An Facebook API error has ocurred", http.StatusUnauthorized)
+		return
+	}
+
+	var user FBUser
+	res.Decode(&user)
+
+	fmt.Println("print first_name in struct:", user.FirstName)
+	fmt.Println("print first_name in struct:", user.LastName)
+
+	ResponseWithJSON(w, user, http.StatusOK)
 }
 
 func ResponseWithJSON(w http.ResponseWriter, result interface{}, code int) {
