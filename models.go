@@ -35,5 +35,7 @@ type Provider struct {
 }
 
 type FBUser struct {
-	 FirstName string	`json:"first_name"`
+	 FirstName string		`json:"first_name"`
+	 LastName string		`json:"last_name"`
 }
+

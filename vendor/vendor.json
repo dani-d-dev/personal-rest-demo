@@ -39,6 +39,12 @@
 			"revisionTime": "2017-10-07T18:57:10Z"
 		},
 		{
+			"checksumSHA1": "4pvIivcK/lVbcGHJXTP6u4Mdd1g=",
+			"path": "github.com/urfave/negroni",
+			"revision": "079cf0c7a6b0145ebcf4103ec90380370cd89917",
+			"revisionTime": "2017-10-16T04:19:05Z"
+		},
+		{
 			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
 			"path": "golang.org/x/net/context",
 			"revision": "c73622c77280266305273cb545f54516ced95b93",
