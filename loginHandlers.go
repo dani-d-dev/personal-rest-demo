@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"log"
+	//"gopkg.in/mgo.v2/bson"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +42,21 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	log.Println("Logging on the way there...")
 
-	if r.Header.Get("password")== "secret123" {
+	usrId := r.Header.Get("X-User")
+	pwd := r.Header.Get("X-Password")
+	//query := bson.M{"user_id":usrId, "token":pwd}
+	//user := playerCollection.Find(query)
+
+	/*
+	if user != nil {
+		next(rw, r)
+	} else {
+		http.Error(rw, "Not Authorized", 401)
+	}
+	*/
+
+
+	if usrId == "usr1" && pwd == "secret123" {
 		next(rw, r)
 	} else {
 		http.Error(rw, "Not Authorized", 401)
