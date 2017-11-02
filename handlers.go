@@ -295,16 +295,25 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	var user FBUser
 	res.Decode(&user)
-
-	// TODO: Generate new token not the same on the response!
-
 	tk := sha256.New()
 	tk.Write([]byte(provider.Token))
 	user.Token = string(tk.Sum(nil))
 	user.NickName = "Default"
 	user.Avatar = res.Get("picture.data.url")
 
+	// Save user
+	err = userPlayerCollection.Insert(user)
+	if err != nil {
+		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+		log.Println("Insertion failed with error :", err)
+		return
+	}
+
 	ResponseWithJSON(w, user, http.StatusOK)
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	ResponseWithJSON(w, "this should be done", http.StatusOK)
 }
 
 func ResponseWithJSON(w http.ResponseWriter, result interface{}, code int) {

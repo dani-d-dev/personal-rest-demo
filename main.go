@@ -1,64 +1,51 @@
 package main
 
 import (
-	"log"
+	//"log"
+	//"net/http"
+	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
+	//"goji.io/middleware"
 	"net/http"
-	"os"
-	"fmt"
-	"gopkg.in/mgo.v2"
-	//"github.com/urfave/negroni"
+	"log"
 )
 
 var playerCollection = getSession().DB("godata").C("user")
 var matchCollection = getSession().DB("godata").C("match")
+var userPlayerCollection = getSession().DB("godata").C("player")
 
 func main() {
 
-	router := NewRouter()
-	log.Fatal(http.ListenAndServe(":"+port(), router))
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", Index)
 
-	//Disable middleware for testing
-	/*
-	n := negroni.New(negroni.HandlerFunc(AuthMiddleware))
+	// Auth
+
+	auth := router.PathPrefix("/auth").Subrouter()
+	auth.Path("/login").HandlerFunc(Login)
+	auth.Path("/logout").HandlerFunc(Logout)
+
+	// Api
+
+	api := mux.NewRouter().PathPrefix("/api").Subrouter().StrictSlash(true)
+	api.HandleFunc("/player/all", PlayersList).Methods("GET")
+	api.HandleFunc("/player/{id}",PlayerShow).Methods("GET")
+	api.HandleFunc("/player", PlayerInsert).Methods("POST")
+	api.HandleFunc("/player/{id}", PlayerUpdate).Methods("PUT")
+	api.HandleFunc("/player/{id}", PlayerDelete).Methods("DELETE")
+	api.HandleFunc("/match/all", MatchList).Methods("GET")
+	api.HandleFunc("/match/{id}", MatchShow).Methods("GET")
+	api.HandleFunc("/match", MatchInsert).Methods("POST")
+	api.HandleFunc("/match/{id}", MatchDelete).Methods("DELETE")
+
+	router.PathPrefix("/api").Handler(negroni.New(
+		negroni.HandlerFunc(AuthMiddleware),
+		negroni.Wrap(api),
+	))
+
+	n:= negroni.Classic()
 	n.UseHandler(router)
 	log.Fatal(http.ListenAndServe(":"+port(), n))
-	*/
 }
-
-func port() string {
-
-	port := os.Getenv("PORT")
-
-	if port == "" {
-		log.Fatal("$PORT must be set")
-		return ""
-	}
-
-	return port
-
-}
-
-func mongoURL() string {
-	url := os.Getenv("MONGO_URL")
-
-	if url == "" {
-		log.Fatal("$MONGO_URL must be set")
-		return ""
-	}
-
-	return url
-}
-
-func getSession() *mgo.Session {
-	sess, err := mgo.Dial(mongoURL())
-	if err != nil {
-		fmt.Printf("Can't connect to mongo, go error %v\n", err)
-		os.Exit(1)
-	}
-
-	return sess
-}
-
-//mongodb://mlab-dani:dani1234@ds117935.mlab.com:17935/godata
 
 
