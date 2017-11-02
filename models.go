@@ -41,5 +41,5 @@ type FBUser struct {
 	FirstName string	`json:"first_name"`
 	LastName string		`json:"last_name"`
 	NickName string		`json:"nick_name"`
-	Avatar string		`json:"picture"`
+	Avatar interface{}	`json:"picture"`
 }

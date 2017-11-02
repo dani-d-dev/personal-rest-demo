@@ -302,7 +302,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	tk.Write([]byte(provider.Token))
 	user.Token = string(tk.Sum(nil))
 	user.NickName = "Default"
-	user.Avatar = string(res.Get("picture.data.url"))
+	user.Avatar = res.Get("picture.data.url")
 
 	ResponseWithJSON(w, user, http.StatusOK)
 }
