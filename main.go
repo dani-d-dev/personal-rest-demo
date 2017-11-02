@@ -6,7 +6,7 @@ import (
 	"os"
 	"fmt"
 	"gopkg.in/mgo.v2"
-	"github.com/urfave/negroni"
+	//"github.com/urfave/negroni"
 )
 
 var playerCollection = getSession().DB("godata").C("user")
@@ -15,9 +15,14 @@ var matchCollection = getSession().DB("godata").C("match")
 func main() {
 
 	router := NewRouter()
+	log.Fatal(http.ListenAndServe(":"+port(), router))
+
+	//Disable middleware for testing
+	/*
 	n := negroni.New(negroni.HandlerFunc(AuthMiddleware))
 	n.UseHandler(router)
 	log.Fatal(http.ListenAndServe(":"+port(), n))
+	*/
 }
 
 func port() string {

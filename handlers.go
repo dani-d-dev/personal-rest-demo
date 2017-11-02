@@ -283,7 +283,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res, err := fb.Get("/me", fb.Params{
-		"fields": "first_name, last_name, picture",
+		"fields": "id, first_name, last_name, picture.type(large)",
 		"access_token": provider.Token,
 	})
 
@@ -295,8 +295,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var user FBUser
 	res.Decode(&user)
 
-	fmt.Println("print first_name in struct:", user.FirstName)
-	fmt.Println("print first_name in struct:", user.LastName)
+	// TODO: Generate new token not the same on the response!
+	user.Token = provider.Token
+	user.NickName = "Default"
+	user.Avatar = res.Get("picture.data.url")
 
 	ResponseWithJSON(w, user, http.StatusOK)
 }

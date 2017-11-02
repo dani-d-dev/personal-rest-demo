@@ -30,14 +30,16 @@ type Match struct {
 
 type matches []Match
 
-
 type Provider struct {
 	Platform string		`json:"platform"`
 	Token string		`json:"token"`
 }
 
 type FBUser struct {
-	 FirstName string		`json:"first_name"`
-	 LastName string		`json:"last_name"`
+	ID string			`json:"id"`
+	Token string		`json:"token"`
+	FirstName string	`json:"first_name"`
+	LastName string		`json:"last_name"`
+	NickName string		`json:"nick_name"`
+	Avatar interface{}	`json:"picture"`
 }
-
