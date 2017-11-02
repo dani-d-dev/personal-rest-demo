@@ -9,6 +9,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"log"
 	fb "github.com/huandu/facebook"
+	"crypto/sha256"
 )
 
 // Handlers
@@ -296,9 +297,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	res.Decode(&user)
 
 	// TODO: Generate new token not the same on the response!
-	user.Token = provider.Token
+
+	tk := sha256.New()
+	tk.Write([]byte(provider.Token))
+	user.Token = string(tk.Sum(nil))
 	user.NickName = "Default"
-	user.Avatar = res.Get("picture.data.url")
+	user.Avatar = string(res.Get("picture.data.url"))
 
 	ResponseWithJSON(w, user, http.StatusOK)
 }
