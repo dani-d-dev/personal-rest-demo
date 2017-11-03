@@ -300,10 +300,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	user.Token = encryptToken(provider.Token)
 	user.Avatar = res.Get("picture.data.url")
 
-	fmt.Printf("%v", user)
+	info, err := userPlayerCollection.Upsert(bson.M{"uid":user.ID}, bson.M{"$set":user})
+	log.Println("Update info:", info)
 
-	// Save user
-	err = userPlayerCollection.Insert(user)
 	if err != nil {
 		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
 		log.Println("Insertion failed with error :", err)
