@@ -34,14 +34,6 @@ func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFu
 	fmt.Printf("User with id: %s", user.ID)
 	log.Println("Ok, authenticated")
 	next(rw, r)
-
-	/*
-	if usrId == "usr1" && pwd == "secret123" {
-		next(rw, r)
-	} else {
-		http.Error(rw, "Not Authorized", 401)
-	}
-	*/
 }
 
 func userExists(id string) bool {
