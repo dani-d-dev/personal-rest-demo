@@ -43,3 +43,16 @@ func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFu
 	}
 	*/
 }
+
+func userExists(id string) bool {
+
+	query := bson.M{"uid":id}
+	var usr FBUser
+	err := userPlayerCollection.Find(query).One(&usr)
+
+	if err != nil {
+		return false
+	}
+
+	return usr != FBUser{}
+}
