@@ -10,6 +10,7 @@ import (
 	"log"
 	fb "github.com/huandu/facebook"
 	"crypto/sha256"
+	"encoding/base64"
 )
 
 // Handlers
@@ -284,7 +285,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res, err := fb.Get("/me", fb.Params{
-		"fields": "id, first_name, last_name, picture.type(large)",
+		"fields": "id, name, first_name, last_name, picture.type(large)",
 		"access_token": provider.Token,
 	})
 
@@ -295,11 +296,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	var user FBUser
 	res.Decode(&user)
-	tk := sha256.New()
-	tk.Write([]byte(provider.Token))
-	user.Token = string(tk.Sum(nil))
-	user.NickName = "Default"
+
+	user.Token = encryptToken(provider.Token)
 	user.Avatar = res.Get("picture.data.url")
+
+	fmt.Printf("%v", user)
 
 	// Save user
 	err = userPlayerCollection.Insert(user)
@@ -310,6 +311,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ResponseWithJSON(w, user, http.StatusOK)
+}
+
+func encryptToken(token string) string {
+	tk := sha256.New()
+	tk.Write([]byte(token))
+	b := tk.Sum(nil)
+	return base64.StdEncoding.EncodeToString(b)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {

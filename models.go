@@ -36,10 +36,10 @@ type Provider struct {
 }
 
 type FBUser struct {
-	ID string			`json:"uid" bson:"uid"`
+	ID string			`json:"id" bson:"uid"`
 	Token string		`json:"token"`
 	FirstName string	`json:"first_name"`
 	LastName string		`json:"last_name"`
-	NickName string		`json:"nick_name"`
+	NickName string		`json:"name"`
 	Avatar interface{}	`json:"picture"`
 }

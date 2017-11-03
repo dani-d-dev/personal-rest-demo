@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"log"
 	//"gopkg.in/mgo.v2/bson"
+	"gopkg.in/mgo.v2/bson"
+	"fmt"
 )
 
 // auth middleware
@@ -14,29 +16,30 @@ func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFu
 	// Get user_id and token from headers
 
 	usrId := r.Header.Get("X-User")
-	pwd := r.Header.Get("X-Password")
+	//pwd := r.Header.Get("X-Password")
 
 	// Query for a db user with the given credentials
 
-	/*
-	query := bson.M{"uid":usrId, "token":pwd}
-	user := userPlayerCollection.Find(query)
+	query := bson.M{"uid":usrId}
+	var user FBUser
+	err := userPlayerCollection.Find(query).One(&user)
 
-	if user != nil {
-		log.Println("Ok, authenticated")
-		next(rw, r)
-	} else {
+	if err != nil {
 		http.Error(rw, "Not Authorized", 401)
+		log.Println("Failed with error: ", err)
+		log.Println("Logging on the way back...")
+		return
 	}
-	*/
 
+	fmt.Printf("User with id: %s", user.ID)
+	log.Println("Ok, authenticated")
+	next(rw, r)
 
+	/*
 	if usrId == "usr1" && pwd == "secret123" {
 		next(rw, r)
 	} else {
 		http.Error(rw, "Not Authorized", 401)
 	}
-
-
-	log.Println("Logging on the way back...")
+	*/
 }
