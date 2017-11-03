@@ -16,11 +16,11 @@ func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFu
 	// Get user_id and token from headers
 
 	usrId := r.Header.Get("X-User")
-	//pwd := r.Header.Get("X-Password")
+	pwd := r.Header.Get("X-Password")
 
 	// Query for a db user with the given credentials
 
-	query := bson.M{"uid":usrId}
+	query := bson.M{"uid":usrId, "token":pwd}
 	var user FBUser
 	err := userPlayerCollection.Find(query).One(&user)
 
