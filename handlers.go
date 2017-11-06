@@ -216,35 +216,6 @@ func MatchInsert(w http.ResponseWriter, r *http.Request) {
 	ResponseWithJSON(w, match, http.StatusOK)
 }
 
-// Get winner and looser tuple id's given a game array
-
-func CalculateScore(player_id_1 string, player_id_2 string, games []int) (string, string) {
-
-	var player1_victories = 0
-	var player2_victories = 0
-
-	for i := 0; i < len(games) + 1; i++ {
-		if i % 2 == 0 {
-			if i > 0 {
-				var p1 = games[i-2]
-				var p2 = games[i-1]
-				if p1 > p2 {
-					player1_victories +=1
-				} else {
-					player2_victories +=1
-				}
-
-				fmt.Printf("[Player 1: %d || Player 2: %d]\n", p1, p2)
-			}
-		}
-	}
-
-	if player1_victories > player2_victories {
-		return player_id_1, player_id_2
-	}
-	return player_id_2, player_id_1
-}
-
 // TODO : MatchUpdate
 
 func MatchDelete(w http.ResponseWriter, r *http.Request) {
@@ -294,13 +265,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user FBUser
+	var user Player
 	res.Decode(&user)
 
 	user.Token = encryptToken(provider.Token)
 	user.Avatar = res.Get("picture.data.url")
 
-	info, err := userPlayerCollection.Upsert(bson.M{"uid":user.ID}, bson.M{"$set":user})
+	info, err := playerCollection.Upsert(bson.M{"uid":user.ID}, bson.M{"$set":user})
 	log.Println("Update info:", info)
 
 	if err != nil {
@@ -310,13 +281,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ResponseWithJSON(w, user, http.StatusOK)
-}
-
-func encryptToken(token string) string {
-	tk := sha256.New()
-	tk.Write([]byte(token))
-	b := tk.Sum(nil)
-	return base64.StdEncoding.EncodeToString(b)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
@@ -333,6 +297,44 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	// TODO : Do a soft delete from user (put a boolean flag or something)
 
 	ResponseWithJSON(w, usr, http.StatusOK)
+}
+
+// Token encryption
+
+func encryptToken(token string) string {
+	tk := sha256.New()
+	tk.Write([]byte(token))
+	b := tk.Sum(nil)
+	return base64.StdEncoding.EncodeToString(b)
+}
+
+// Get winner and looser tuple id's given a game array
+
+func CalculateScore(player_id_1 string, player_id_2 string, games []int) (string, string) {
+
+	var player1_victories = 0
+	var player2_victories = 0
+
+	for i := 0; i < len(games) + 1; i++ {
+		if i % 2 == 0 {
+			if i > 0 {
+				var p1 = games[i-2]
+				var p2 = games[i-1]
+				if p1 > p2 {
+					player1_victories +=1
+				} else {
+					player2_victories +=1
+				}
+
+				fmt.Printf("[Player 1: %d || Player 2: %d]\n", p1, p2)
+			}
+		}
+	}
+
+	if player1_victories > player2_victories {
+		return player_id_1, player_id_2
+	}
+	return player_id_2, player_id_1
 }
 
 func ResponseWithJSON(w http.ResponseWriter, result interface{}, code int) {

@@ -28,27 +28,14 @@ func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFu
 	next(rw, r)
 }
 
-func getUser(uid string, token string) (FBUser, error) {
+func getUser(uid string, token string) (Player, error) {
 	query := bson.M{"uid":uid, "token":token}
-	var user FBUser
-	err := userPlayerCollection.Find(query).One(&user)
+	var user Player
+	err := playerCollection.Find(query).One(&user)
 
 	if err != nil {
-		return FBUser{}, err
+		return Player{}, err
 	}
 
 	return user, err
-}
-
-func userExists(id string) bool {
-
-	query := bson.M{"uid":id}
-	var usr FBUser
-	err := userPlayerCollection.Find(query).One(&usr)
-
-	if err != nil {
-		return false
-	}
-
-	return usr != FBUser{}
 }

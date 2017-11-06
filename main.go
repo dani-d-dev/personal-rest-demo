@@ -10,9 +10,8 @@ import (
 	"log"
 )
 
-var playerCollection = getSession().DB("godata").C("user")
+var playerCollection = getSession().DB("godata").C("player")
 var matchCollection = getSession().DB("godata").C("match")
-var userPlayerCollection = getSession().DB("godata").C("player")
 
 func main() {
 

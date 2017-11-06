@@ -6,13 +6,12 @@ import (
 )
 
 type Player struct {
-	ID bson.ObjectId	`json:"id" bson:"_id,omitempty"`
-	UserID string		`json:"user_id"`
+	ID string			`json:"id" bson:"uid"`
 	Token string		`json:"token"`
-	Firstname string   	`json:"first_name,omitempty"`
-	Lastname  string   	`json:"last_name,omitempty"`
-	NickName  string   	`json:"nick_name,omitempty"`
-	AvatarUrl  string   `json:"avatar_url,omitempty"`
+	FirstName string	`json:"first_name"`
+	LastName string		`json:"last_name"`
+	NickName string		`json:"name"`
+	Avatar interface{}	`json:"picture"`
 }
 
 type Players []Player
@@ -35,11 +34,3 @@ type Provider struct {
 	Token string		`json:"token"`
 }
 
-type FBUser struct {
-	ID string			`json:"id" bson:"uid"`
-	Token string		`json:"token"`
-	FirstName string	`json:"first_name"`
-	LastName string		`json:"last_name"`
-	NickName string		`json:"name"`
-	Avatar interface{}	`json:"picture"`
-}
