@@ -3,37 +3,41 @@ package main
 import (
 	"net/http"
 	"log"
-	//"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2/bson"
-	"fmt"
 )
 
 // auth middleware
 func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
-	log.Println("Logging on the way there...")
-
 	// Get user_id and token from headers
 
-	usrId := r.Header.Get("X-User")
+	uid := r.Header.Get("X-User")
 	pwd := r.Header.Get("X-Password")
 
 	// Query for a db user with the given credentials
 
-	query := bson.M{"uid":usrId, "token":pwd}
-	var user FBUser
-	err := userPlayerCollection.Find(query).One(&user)
+	usr, err := getUser(uid, pwd)
 
 	if err != nil {
 		http.Error(rw, "Not Authorized", 401)
 		log.Println("Failed with error: ", err)
-		log.Println("Logging on the way back...")
 		return
 	}
 
-	fmt.Printf("User with id: %s", user.ID)
-	log.Println("Ok, authenticated")
+	log.Println("User with id: ", usr.ID)
 	next(rw, r)
+}
+
+func getUser(uid string, token string) (FBUser, error) {
+	query := bson.M{"uid":uid, "token":token}
+	var user FBUser
+	err := userPlayerCollection.Find(query).One(&user)
+
+	if err != nil {
+		return FBUser{}, err
+	}
+
+	return user, err
 }
 
 func userExists(id string) bool {

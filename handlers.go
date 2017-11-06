@@ -320,7 +320,19 @@ func encryptToken(token string) string {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	ResponseWithJSON(w, "this should be done", http.StatusOK)
+
+	uid := r.Header.Get("X-User")
+	pwd := r.Header.Get("X-Password")
+	usr, err := getUser(uid, pwd)
+
+	if err != nil {
+		http.Error(w, "User not founded", http.StatusNotFound)
+		return
+	}
+
+	// TODO : Do a soft delete from user (put a boolean flag or something)
+
+	ResponseWithJSON(w, usr, http.StatusOK)
 }
 
 func ResponseWithJSON(w http.ResponseWriter, result interface{}, code int) {
