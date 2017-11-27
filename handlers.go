@@ -97,7 +97,7 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 	members := append(team.Members, player)
 	team.Members = members
 
-	info, err := teamCollection.Upsert(bson.M{"uid":team.ID}, bson.M{"$set":team})
+	info, err := teamCollection.Upsert(bson.M{"_id":team_id}, bson.M{"$set":team})
 
 	log.Println("Update info:", info)
 

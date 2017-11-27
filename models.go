@@ -38,11 +38,11 @@ type Provider struct {
 }
 
 type Team struct {
-	ID       bson.ObjectId	`json:"id" bson:"uid"`
+	ID bson.ObjectId		`json:"id" bson:"_id,omitempty"`
 	Name string				`json:"name"`
 	City string				`json:"city"`
 	Description string		`json:"description"`
-	Members []Player		`json:"members"`
+	Members Players			`json:"members"`
 }
 
 type Teams []Team
