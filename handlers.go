@@ -11,12 +11,103 @@ import (
 	fb "github.com/huandu/facebook"
 	"crypto/sha256"
 	"encoding/base64"
+	//"os/user"
 )
 
 // Handlers
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Main page goes here..."))
+}
+
+// Team Minimalistic CRUD
+
+func TeamList(w http.ResponseWriter, _ *http.Request) {
+
+	var result Teams
+	err := teamCollection.Find(nil).Sort("-_id").All(&result)
+
+	if err != nil || len(result) == 0{
+		ErrorWithJSON(w, "Teams not found", http.StatusNotFound)
+		return
+	}
+
+	ResponseWithJSON(w, result, http.StatusOK)
+}
+
+func TeamInsert(w http.ResponseWriter, r *http.Request) {
+
+	var team Team
+	err := json.NewDecoder(r.Body).Decode(&team)
+
+	if err != nil {
+		ErrorWithJSON(w, "Cannot insert record on db", http.StatusNotAcceptable)
+		return
+	}
+
+	defer r.Body.Close()
+
+	err = teamCollection.Insert(team)
+
+	if err != nil {
+		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+		log.Println("Insertion failed with error :", err)
+		return
+	}
+
+	ResponseWithJSON(w, team, http.StatusOK)
+}
+
+func TeamJoin(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	team_id := params["id"]
+
+	// Search for a valid ID format and if it exists in DB
+
+	if !bson.IsObjectIdHex(team_id) {
+		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
+		return
+	}
+
+	oid := bson.ObjectIdHex(team_id)
+
+	var team Team
+	err := playerCollection.FindId(oid).One(&team)
+
+	if err != nil {
+		ErrorWithJSON(w, "Team not found", http.StatusNotFound)
+		return
+	}
+
+	// Parse player from body request
+
+	var player Player
+	error := json.NewDecoder(r.Body).Decode(&player)
+
+	if error != nil {
+		ErrorWithJSON(w, "Cannot decode player json dictionary", http.StatusNotAcceptable)
+		return
+	}
+
+	defer r.Body.Close()
+
+	// Add new player to the team's array and update DB
+
+	members := append(team.Members, player)
+	team.Members = members
+
+	info, err := teamCollection.Upsert(bson.M{"uid":team.ID}, bson.M{"$set":team})
+
+	log.Println("Update info:", info)
+
+	if err != nil {
+		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+		log.Println("Insertion failed with error :", err)
+		return
+	}
+
+	ResponseWithJSON(w, team, http.StatusOK)
 }
 
 // Player CRUD
@@ -269,8 +360,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	res.Decode(&user)
 
 	user.Token = encryptToken(provider.Token)
+	user.NickName = "Your NickName"
 	user.Avatar = res.Get("picture.data.url")
-
+	user.IsLeftHanded = false
+	user.IsGripShakeHand = true
 	info, err := playerCollection.Upsert(bson.M{"uid":user.ID}, bson.M{"$set":user})
 	log.Println("Update info:", info)
 

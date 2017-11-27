@@ -6,12 +6,15 @@ import (
 )
 
 type Player struct {
-	ID string			`json:"id" bson:"uid"`
-	Token string		`json:"token"`
-	FirstName string	`json:"first_name"`
-	LastName string		`json:"last_name"`
-	NickName string		`json:"name"`
-	Avatar interface{}	`json:"picture"`
+	ID string				`json:"id" bson:"uid"`
+	Token string			`json:"token"`
+	FirstName string		`json:"first_name"`
+	LastName string			`json:"last_name",omitempty`
+	NickName string			`json:"name",omitempty`
+	Avatar interface{}		`json:"picture",omitempty`
+	Location string			`json:"location",omitempty`
+	IsLeftHanded bool		`json:"is_left_handed"`
+	IsGripShakeHand bool 	`json:"is_grip_shakehand"`
 }
 
 type Players []Player
@@ -33,4 +36,15 @@ type Provider struct {
 	Platform string		`json:"platform"`
 	Token string		`json:"token"`
 }
+
+type Team struct {
+	ID       bson.ObjectId	`json:"id" bson:"uid"`
+	Name string				`json:"name"`
+	City string				`json:"city"`
+	Description string		`json:"description"`
+	Members []Player		`json:"members"`
+}
+
+type Teams []Team
+
 
