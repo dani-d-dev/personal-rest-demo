@@ -83,6 +83,7 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 	// Parse player from body request
 
 	var player Player
+
 	error := json.NewDecoder(r.Body).Decode(&player)
 
 	if error != nil {
