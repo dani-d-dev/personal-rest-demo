@@ -73,7 +73,7 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 	oid := bson.ObjectIdHex(team_id)
 
 	var team Team
-	err := playerCollection.FindId(oid).One(&team)
+	err := teamCollection.FindId(oid).One(&team)
 
 	if err != nil {
 		ErrorWithJSON(w, "Team not found", http.StatusNotFound)
@@ -98,15 +98,7 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 	members := append(team.Members, player)
 	team.Members = members
 
-	info, err := teamCollection.Upsert(bson.M{"_id":team_id}, bson.M{"$set":team})
-
-	log.Println("Update info:", info)
-
-	if err != nil {
-		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
-		log.Println("Insertion failed with error :", err)
-		return
-	}
+	teamCollection.UpdateId(team.ID, team)
 
 	ResponseWithJSON(w, team, http.StatusOK)
 }
@@ -130,15 +122,15 @@ func PlayerShow(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	player_id := params["id"]
 
-	if !bson.IsObjectIdHex(player_id) {
+/*	if !bson.IsObjectIdHex(player_id) {
 		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
 		return
 	}
 
-	oid := bson.ObjectIdHex(player_id)
+	oid := bson.ObjectIdHex(player_id)*/
 
 	var result Player
-	err := playerCollection.FindId(oid).One(&result)
+	err := playerCollection.Find(bson.M{"uid":player_id}).One(&result)
 
 	if err != nil {
 		ErrorWithJSON(w, "Player not found", http.StatusNotFound)

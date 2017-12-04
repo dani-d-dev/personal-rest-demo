@@ -38,7 +38,7 @@ func main() {
 	api.HandleFunc("/match", MatchInsert).Methods("POST")
 	api.HandleFunc("/match/{id}", MatchDelete).Methods("DELETE")
 	api.HandleFunc("/team/all", TeamList).Methods("GET")
-	api.HandleFunc("/team", TeamInsert).Methods("POST")
+	api.HandleFunc("/team/", TeamInsert).Methods("POST")
 	api.HandleFunc("/team/{id}/join", TeamJoin).Methods("POST")
 
 	router.PathPrefix("/api").Handler(negroni.New(
