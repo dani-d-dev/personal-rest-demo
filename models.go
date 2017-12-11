@@ -5,6 +5,11 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+type Provider struct {
+	Platform string		`json:"platform"`
+	Token string		`json:"token"`
+}
+
 type Player struct {
 	ID string				`json:"id" bson:"uid"`
 	Token string			`json:"token"`
@@ -32,11 +37,6 @@ type Match struct {
 
 type matches []Match
 
-type Provider struct {
-	Platform string		`json:"platform"`
-	Token string		`json:"token"`
-}
-
 type Team struct {
 	ID bson.ObjectId		`json:"id" bson:"_id,omitempty"`
 	Name string				`json:"name"`
@@ -46,5 +46,22 @@ type Team struct {
 }
 
 type Teams []Team
+
+type Message struct {
+	ID bson.ObjectId		`json:"id" bson:"_id"`
+	SenderID	string		`json:"sender_id" bson:"sender_id"`
+	ReceiverID	string		`json:"receiver_id" bson:"receiver_id"`
+	Text		string		`json:"text"`
+	Reason		ReasonType	`json:"reason"`
+}
+
+type Messages []Message
+
+type ReasonType int16
+
+const (
+	JOIN_REQUEST ReasonType = 0
+	CHALLENGE ReasonType = 1
+)
 
 

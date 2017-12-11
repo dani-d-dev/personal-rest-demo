@@ -10,8 +10,9 @@ import (
 	"log"
 )
 
-var teamCollection = getSession().DB("godata").C("team")
 var playerCollection = getSession().DB("godata").C("player")
+var messageCollection = getSession().DB("godata").C("message")
+var teamCollection = getSession().DB("godata").C("team")
 var matchCollection = getSession().DB("godata").C("match")
 
 func main() {
@@ -40,6 +41,8 @@ func main() {
 	api.HandleFunc("/team/all", TeamList).Methods("GET")
 	api.HandleFunc("/team/", TeamInsert).Methods("POST")
 	api.HandleFunc("/team/{id}/join", TeamJoin).Methods("POST")
+	api.HandleFunc("/message/all", MessageList).Methods("GET")
+	api.HandleFunc("/message/send/{id}", MessageSend).Methods("POST")
 
 	router.PathPrefix("/api").Handler(negroni.New(
 		negroni.HandlerFunc(AuthMiddleware),

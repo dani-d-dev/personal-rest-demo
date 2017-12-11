@@ -39,3 +39,15 @@ func getUser(uid string, token string) (Player, error) {
 
 	return user, err
 }
+
+func userExists(uid string) (bool) {
+
+	var user Player
+	err := playerCollection.Find(bson.M{"uid":uid}).One(&user)
+
+	if err != nil {
+		return false
+	}
+
+	return true
+}

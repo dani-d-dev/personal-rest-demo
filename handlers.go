@@ -47,6 +47,13 @@ func TeamInsert(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
+	// Check if an owner is provided on the teams array
+
+	if len(team.Members) != 1 {
+		ErrorWithJSON(w, "An owner of the team should be provided", http.StatusNotImplemented)
+		return
+	}
+
 	err = teamCollection.Insert(team)
 
 	if err != nil {
@@ -101,6 +108,51 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 	teamCollection.UpdateId(team.ID, team)
 
 	ResponseWithJSON(w, team, http.StatusOK)
+}
+
+// Message CRUD
+
+func MessageList(w http.ResponseWriter, _ *http.Request) {
+
+	var result Messages
+	err := messageCollection.Find(nil).Sort("-_id").All(&result)
+
+	if err != nil || len(result) == 0{
+		ErrorWithJSON(w, "Messages not found", http.StatusNotFound)
+		return
+	}
+
+	ResponseWithJSON(w, result, http.StatusOK)
+}
+
+func MessageSend(w http.ResponseWriter, r *http.Request) {
+
+	receiverId := mux.Vars(r)["id"]
+
+	if !userExists(receiverId) {
+		ErrorWithJSON(w, "The provided user id was not found, check if user exists", http.StatusNotFound)
+		return
+	}
+
+	var message Message
+	err := json.NewDecoder(r.Body).Decode(&message)
+
+	if err != nil {
+		ErrorWithJSON(w, "Cannot parse json into an object model", http.StatusNotAcceptable)
+		return
+	}
+
+	defer r.Body.Close()
+
+	err = messageCollection.Insert(message)
+
+	if err != nil {
+		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+		log.Println("Insertion failed with error :", err)
+		return
+	}
+
+	ResponseWithJSON(w, message, http.StatusOK)
 }
 
 // Player CRUD
