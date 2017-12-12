@@ -24,15 +24,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func TeamList(w http.ResponseWriter, _ *http.Request) {
 
-	var result Teams
-	err := teamCollection.Find(nil).Sort("-_id").All(&result)
+	teams, err := FindAll(teamCollection)
 
-	if err != nil || len(result) == 0{
+	if err != nil || len(teams) == 0 {
 		ErrorWithJSON(w, "Teams not found", http.StatusNotFound)
 		return
 	}
 
-	ResponseWithJSON(w, result, http.StatusOK)
+	ResponseWithJSON(w, teams, http.StatusOK)
 }
 
 func TeamInsert(w http.ResponseWriter, r *http.Request) {
@@ -166,37 +165,27 @@ func MessageSend(w http.ResponseWriter, r *http.Request) {
 
 func PlayersList(w http.ResponseWriter, _ *http.Request) {
 
-	var result Players
-	err := playerCollection.Find(nil).Sort("-_id").All(&result)
+	players, err := FindAll(playerCollection)
 
-	if err != nil || len(result) == 0{
+	if err != nil || len(players) == 0 {
 		ErrorWithJSON(w, "Players not found", http.StatusNotFound)
 		return
 	}
 
-	ResponseWithJSON(w, result, http.StatusOK)
+	ResponseWithJSON(w, players, http.StatusOK)
 }
 
 func PlayerShow(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	player_id := params["id"]
 
-/*	if !bson.IsObjectIdHex(player_id) {
-		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
-		return
-	}
-
-	oid := bson.ObjectIdHex(player_id)*/
-
-	var result Player
-	err := playerCollection.Find(bson.M{"uid":player_id}).One(&result)
+	playerId := mux.Vars(r)["id"]
+	player, err := FindByUID(playerId, playerCollection)
 
 	if err != nil {
 		ErrorWithJSON(w, "Player not found", http.StatusNotFound)
 		return
 	}
 
-	ResponseWithJSON(w, result, http.StatusOK)
+	ResponseWithJSON(w, player, http.StatusOK)
 }
 
 func PlayerInsert(w http.ResponseWriter, r *http.Request) {

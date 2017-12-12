@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"log"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // auth middleware
@@ -26,28 +25,4 @@ func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	log.Println("User with id: ", usr.ID)
 	next(rw, r)
-}
-
-func getUser(uid string, token string) (Player, error) {
-	query := bson.M{"uid":uid, "token":token}
-	var user Player
-	err := playerCollection.Find(query).One(&user)
-
-	if err != nil {
-		return Player{}, err
-	}
-
-	return user, err
-}
-
-func userExists(uid string) (bool) {
-
-	var user Player
-	err := playerCollection.Find(bson.M{"uid":uid}).One(&user)
-
-	if err != nil {
-		return false
-	}
-
-	return true
 }
