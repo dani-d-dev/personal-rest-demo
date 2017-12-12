@@ -100,6 +100,13 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
+	// Check that player exists in db
+
+	if !userExists(player.ID) {
+		ErrorWithJSON(w, "Check that user exists", http.StatusNotFound)
+		return
+	}
+
 	// Add new player to the team's array and update DB
 
 	members := append(team.Members, player)

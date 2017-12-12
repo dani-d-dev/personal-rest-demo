@@ -13,32 +13,32 @@ type Provider struct {
 type Player struct {
 	ID string				`json:"id" bson:"uid"`
 	Token string			`json:"token"`
-	FirstName string		`json:"first_name"`
-	LastName string			`json:"last_name",omitempty`
-	NickName string			`json:"name",omitempty`
-	Avatar interface{}		`json:"picture",omitempty`
-	Location string			`json:"location",omitempty`
-	IsLeftHanded bool		`json:"is_left_handed"`
-	IsGripShakeHand bool 	`json:"is_grip_shakehand"`
+	FirstName string		`json:"first_name" bson:"first_name"`
+	LastName string			`json:"last_name" bson:"last_name"`
+	NickName string			`json:"name" bson:"nick_name"`
+	Avatar interface{}		`json:"picture"`
+	Location string			`json:"location"`
+	IsLeftHanded bool		`json:"is_left_handed" bson:"is_left_handed"`
+	IsGripShakeHand bool 	`json:"is_grip_shakehand" bson:"is_grip_shakehand"`
 }
 
 type Players []Player
 
 type Match struct {
-	ID bson.ObjectId	`json:"id" bson:"_id,omitempty"`
-	Startime  time.Time `json:"start_time"`
-	Endtime  time.Time 	`json:"end_time"`
-	Player1 string 		`json:"player_1"`
-	Player2 string 		`json:"player_2"`
-	Winner string 		`json:"winner,omitempty"`
-	Loser string 		`json:"loser,omitempty"`
+	ID bson.ObjectId	`json:"id" bson:"_id"`
+	StarTime  time.Time `json:"start_time" bson:"start_time"`
+	EndTime  time.Time 	`json:"end_time" bson:"end_time"`
+	Player1 string 		`json:"player_1" bson:"player_1"`
+	Player2 string 		`json:"player_2" bson:"player_2"`
+	Winner string 		`json:"winner"`
+	Loser string 		`json:"loser"`
 	Games []int			`json:"games"`
 }
 
 type matches []Match
 
 type Team struct {
-	ID bson.ObjectId		`json:"id" bson:"_id,omitempty"`
+	ID bson.ObjectId		`json:"id" bson:"_id"`
 	Name string				`json:"name"`
 	City string				`json:"city"`
 	Description string		`json:"description"`
@@ -53,6 +53,7 @@ type Message struct {
 	ReceiverID	string		`json:"receiver_id" bson:"receiver_id"`
 	Text		string		`json:"text"`
 	Reason		ReasonType	`json:"reason"`
+	Declined	bool		`json:"declined"` // Whether has declined or accepted
 }
 
 type Messages []Message
