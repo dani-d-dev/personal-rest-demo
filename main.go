@@ -46,7 +46,7 @@ func main() {
 	api.HandleFunc("/message/send/{id}", MessageSend).Methods("POST")
 
 	router.PathPrefix("/api").Handler(negroni.New(
-		// negroni.HandlerFunc(AuthMiddleware),
+		negroni.HandlerFunc(AuthMiddleware),
 		negroni.Wrap(api),
 	))
 
