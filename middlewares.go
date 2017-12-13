@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 )
 
 // auth middleware
@@ -15,7 +15,7 @@ func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 	// Query for a db user with the given credentials
 
-	usr, err := getUser(uid, pwd)
+	usr, err := authUser(uid, pwd)
 
 	if err != nil {
 		http.Error(rw, "Not Authorized", 401)

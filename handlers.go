@@ -1,16 +1,15 @@
 package main
 
 import (
-	"net/http"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"fmt"
-	"gopkg.in/mgo.v2/bson"
-	"gopkg.in/mgo.v2"
 	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
 	fb "github.com/huandu/facebook"
-	"crypto/sha256"
-	"encoding/base64"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	//"os/user"
 )
 
@@ -21,6 +20,20 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 // Team Minimalistic CRUD
+
+func TeamShow(w http.ResponseWriter, r *http.Request) {
+
+	teamId := mux.Vars(r)["id"]
+
+	team, err := FindByID(teamId, teamCollection)
+
+	if err != nil {
+		ErrorWithJSON(w, "Team not found", http.StatusNotFound)
+		return
+	}
+
+	ResponseWithJSON(w, team, http.StatusOK)
+}
 
 func TeamList(w http.ResponseWriter, _ *http.Request) {
 
@@ -120,15 +133,14 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 
 func MessageList(w http.ResponseWriter, _ *http.Request) {
 
-	var result Messages
-	err := messageCollection.Find(nil).Sort("-_id").All(&result)
+	messages, err := FindAll(messageCollection)
 
-	if err != nil || len(result) == 0{
+	if err != nil || len(messages) == 0 {
 		ErrorWithJSON(w, "Messages not found", http.StatusNotFound)
 		return
 	}
 
-	ResponseWithJSON(w, result, http.StatusOK)
+	ResponseWithJSON(w, messages, http.StatusOK)
 }
 
 func MessageSend(w http.ResponseWriter, r *http.Request) {
@@ -232,8 +244,8 @@ func PlayerUpdate(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	document := bson.M{"_id":oid}
-	change := bson.M{"$set":player}
+	document := bson.M{"_id": oid}
+	change := bson.M{"$set": player}
 	err = playerCollection.Update(document, change)
 
 	if err != nil {
@@ -282,35 +294,21 @@ func PlayerDelete(w http.ResponseWriter, r *http.Request) {
 
 func MatchList(w http.ResponseWriter, _ *http.Request) {
 
-	var result matches
-	err := matchCollection.Find(nil).Sort("-_id").All(&result)
+	matches, err := FindAll(matchCollection)
 
-	if err != nil || len(result) == 0 {
-		ErrorWithJSON(w,"Matches not found",http.StatusNotFound)
+	if err != nil || len(matches) == 0 {
+		ErrorWithJSON(w, "Matches not found", http.StatusNotFound)
 		return
 	}
 
-	// TODO : Populate results with player data refered by id's
-
-	//fmt.Printf("First element's id: ", bson.M{"_id":result[0].ID})
-
-	ResponseWithJSON(w, result, http.StatusOK)
+	ResponseWithJSON(w, matches, http.StatusOK)
 }
 
 func MatchShow(w http.ResponseWriter, r *http.Request) {
 
-	params := mux.Vars(r)
-	match_id := params["id"]
+	matchId := mux.Vars(r)["id"]
 
-	if !bson.IsObjectIdHex(match_id) {
-		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
-		return
-	}
-
-	oid := bson.ObjectIdHex(match_id)
-
-	var match Match
-	err := matchCollection.FindId(oid).One(&match)
+	match, err := FindByID(matchId, matchCollection)
 
 	if err != nil {
 		ErrorWithJSON(w, "Match not found", http.StatusNotFound)
@@ -388,7 +386,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res, err := fb.Get("/me", fb.Params{
-		"fields": "id, name, first_name, last_name, picture.type(large)",
+		"fields":       "id, name, first_name, last_name, picture.type(large)",
 		"access_token": provider.Token,
 	})
 
@@ -405,7 +403,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	user.Avatar = res.Get("picture.data.url")
 	user.IsLeftHanded = false
 	user.IsGripShakeHand = true
-	info, err := playerCollection.Upsert(bson.M{"uid":user.ID}, bson.M{"$set":user})
+	info, err := playerCollection.Upsert(bson.M{"uid": user.ID}, bson.M{"$set": user})
 	log.Println("Update info:", info)
 
 	if err != nil {
@@ -421,7 +419,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	uid := r.Header.Get("X-User")
 	pwd := r.Header.Get("X-Password")
-	usr, err := getUser(uid, pwd)
+	usr, err := authUser(uid, pwd)
 
 	if err != nil {
 		http.Error(w, "User not founded", http.StatusNotFound)
@@ -431,54 +429,4 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	// TODO : Do a soft delete from user (put a boolean flag or something)
 
 	ResponseWithJSON(w, usr, http.StatusOK)
-}
-
-// Token encryption
-
-func encryptToken(token string) string {
-	tk := sha256.New()
-	tk.Write([]byte(token))
-	b := tk.Sum(nil)
-	return base64.StdEncoding.EncodeToString(b)
-}
-
-// Get winner and looser tuple id's given a game array
-
-func CalculateScore(player_id_1 string, player_id_2 string, games []int) (string, string) {
-
-	var player1_victories = 0
-	var player2_victories = 0
-
-	for i := 0; i < len(games) + 1; i++ {
-		if i % 2 == 0 {
-			if i > 0 {
-				var p1 = games[i-2]
-				var p2 = games[i-1]
-				if p1 > p2 {
-					player1_victories +=1
-				} else {
-					player2_victories +=1
-				}
-
-				fmt.Printf("[Player 1: %d || Player 2: %d]\n", p1, p2)
-			}
-		}
-	}
-
-	if player1_victories > player2_victories {
-		return player_id_1, player_id_2
-	}
-	return player_id_2, player_id_1
-}
-
-func ResponseWithJSON(w http.ResponseWriter, result interface{}, code int) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(result)
-}
-
-func ErrorWithJSON(w http.ResponseWriter, message string, code int) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(code)
-	fmt.Fprintf(w, "{message: %q}", message)
 }
