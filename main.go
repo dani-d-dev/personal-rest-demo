@@ -42,7 +42,7 @@ func main() {
 	api.HandleFunc("/team/{id}", TeamShow).Methods("GET")
 	api.HandleFunc("/team/", TeamInsert).Methods("POST")
 	api.HandleFunc("/team/{id}/join", TeamJoin).Methods("POST")
-	api.HandleFunc("/team/{id}/ask", TeamAsk).Methods("POST")
+	api.HandleFunc("/team/{id}/ask/{uid}", TeamAsk).Methods("POST")
 	api.HandleFunc("/message/all", MessageList).Methods("GET")
 	api.HandleFunc("/message/send/{id}", MessageSend).Methods("POST")
 

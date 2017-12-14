@@ -7,46 +7,25 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func FindAll(collection *mgo.Collection) ([]interface{}, error) {
+func FindAll(collection *mgo.Collection, result interface{}) error {
 
-	var result []interface{}
-	err := collection.Find(nil).Sort("-_id").All(&result)
-
-	return result, err
+	return collection.Find(nil).Sort("-_id").All(result)
 }
 
-func FindByID(id string, collection *mgo.Collection) (interface{}, error) {
-
-	var result interface{}
-
-	if !bson.IsObjectIdHex(id) {
-		return result, errors.New("The provided id is not in hex format")
-	}
-
-	oid := bson.ObjectIdHex(id)
-	err := collection.FindId(oid).One(&result)
-
-	return result, err
-}
-
-func FindEntityByID(id string, collection *mgo.Collection, result interface{}) error {
+func FindByID(id string, collection *mgo.Collection, result interface{}) error {
 
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("The provided id is not in hex format")
 	}
 
 	oid := bson.ObjectIdHex(id)
-	err := collection.FindId(oid).One(result)
 
-	return err
+	return collection.FindId(oid).One(result)
 }
 
-func FindByUID(uid string, collection *mgo.Collection) (interface{}, error) {
+func FindByUID(uid string, collection *mgo.Collection, result interface{}) error {
 
-	var result interface{}
-	err := collection.Find(bson.M{"uid": uid}).One(&result)
-
-	return result, err
+	return collection.Find(bson.M{"uid": uid}).One(result)
 }
 
 func authUser(uid string, token string) (Player, error) {

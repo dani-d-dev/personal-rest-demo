@@ -25,7 +25,9 @@ func TeamShow(w http.ResponseWriter, r *http.Request) {
 
 	teamId := mux.Vars(r)["id"]
 
-	team, err := FindByID(teamId, teamCollection)
+	var team Team
+
+	err := FindByID(teamId, teamCollection, &team)
 
 	if err != nil {
 		ErrorWithJSON(w, "Team not found", http.StatusNotFound)
@@ -37,7 +39,9 @@ func TeamShow(w http.ResponseWriter, r *http.Request) {
 
 func TeamList(w http.ResponseWriter, _ *http.Request) {
 
-	teams, err := FindAll(teamCollection)
+	var teams Teams
+
+	err := FindAll(teamCollection, &teams)
 
 	if err != nil || len(teams) == 0 {
 		ErrorWithJSON(w, "Teams not found", http.StatusNotFound)
@@ -79,17 +83,16 @@ func TeamInsert(w http.ResponseWriter, r *http.Request) {
 
 func TeamJoin(w http.ResponseWriter, r *http.Request) {
 
-	params := mux.Vars(r)
-	team_id := params["id"]
+	teamId := mux.Vars(r)["id"]
 
 	// Search for a valid ID format and if it exists in DB
 
-	if !bson.IsObjectIdHex(team_id) {
+	if !bson.IsObjectIdHex(teamId) {
 		ErrorWithJSON(w, "Identifier field not in hex format", http.StatusNotFound)
 		return
 	}
 
-	oid := bson.ObjectIdHex(team_id)
+	oid := bson.ObjectIdHex(teamId)
 
 	var team Team
 	err := teamCollection.FindId(oid).One(&team)
@@ -132,12 +135,18 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 func TeamAsk(w http.ResponseWriter, r *http.Request) {
 
 	teamId := mux.Vars(r)["id"]
+	playerId := mux.Vars(r)["uid"]
 
 	var team Team
-	er := FindEntityByID(teamId, teamCollection, &team)
+	err := FindByID(teamId, teamCollection, &team)
 
-	if er != nil {
+	if err != nil {
 		ErrorWithJSON(w, "Team not found", http.StatusNotFound)
+		return
+	}
+
+	if !userExists(playerId) {
+		ErrorWithJSON(w, "User not found", http.StatusNotFound)
 		return
 	}
 
@@ -155,7 +164,12 @@ func TeamAsk(w http.ResponseWriter, r *http.Request) {
 	joinRequests := append(team.JoinRequests, teamId)
 	team.JoinRequests = joinRequests
 
-	teamCollection.UpdateId(teamId, team)
+	err = teamCollection.UpdateId(teamId, team)
+
+	if err != nil {
+		ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+		return
+	}
 
 	ResponseWithJSON(w, team, http.StatusOK)
 }
@@ -164,7 +178,8 @@ func TeamAsk(w http.ResponseWriter, r *http.Request) {
 
 func MessageList(w http.ResponseWriter, _ *http.Request) {
 
-	messages, err := FindAll(messageCollection)
+	var messages Messages
+	err := FindAll(messageCollection, &messages)
 
 	if err != nil || len(messages) == 0 {
 		ErrorWithJSON(w, "Messages not found", http.StatusNotFound)
@@ -208,7 +223,8 @@ func MessageSend(w http.ResponseWriter, r *http.Request) {
 
 func PlayersList(w http.ResponseWriter, _ *http.Request) {
 
-	players, err := FindAll(playerCollection)
+	var players Players
+	err := FindAll(playerCollection, &players)
 
 	if err != nil || len(players) == 0 {
 		ErrorWithJSON(w, "Players not found", http.StatusNotFound)
@@ -221,7 +237,8 @@ func PlayersList(w http.ResponseWriter, _ *http.Request) {
 func PlayerShow(w http.ResponseWriter, r *http.Request) {
 
 	playerId := mux.Vars(r)["id"]
-	player, err := FindByUID(playerId, playerCollection)
+	var player Player
+	err := FindByUID(playerId, playerCollection, &player)
 
 	if err != nil {
 		ErrorWithJSON(w, "Player not found", http.StatusNotFound)
@@ -325,7 +342,8 @@ func PlayerDelete(w http.ResponseWriter, r *http.Request) {
 
 func MatchList(w http.ResponseWriter, _ *http.Request) {
 
-	matches, err := FindAll(matchCollection)
+	var matches []Match
+	err := FindAll(matchCollection, &matches)
 
 	if err != nil || len(matches) == 0 {
 		ErrorWithJSON(w, "Matches not found", http.StatusNotFound)
@@ -339,7 +357,8 @@ func MatchShow(w http.ResponseWriter, r *http.Request) {
 
 	matchId := mux.Vars(r)["id"]
 
-	match, err := FindByID(matchId, matchCollection)
+	var match Match
+	err := FindByID(matchId, matchCollection, &match)
 
 	if err != nil {
 		ErrorWithJSON(w, "Match not found", http.StatusNotFound)

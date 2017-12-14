@@ -44,7 +44,7 @@ type Team struct {
 	City         string        `json:"city"`
 	Description  string        `json:"description"`
 	Members      Players       `json:"members"`
-	JoinRequests []string      `json:"join_requests" bson:"join_requests"`
+	JoinRequests []string      `json:"join_requests, omitempty" bson:"join_requests"`
 }
 
 type Teams []Team
