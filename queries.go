@@ -29,6 +29,18 @@ func FindByID(id string, collection *mgo.Collection) (interface{}, error) {
 	return result, err
 }
 
+func FindEntityByID(id string, collection *mgo.Collection, result interface{}) error {
+
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("The provided id is not in hex format")
+	}
+
+	oid := bson.ObjectIdHex(id)
+	err := collection.FindId(oid).One(result)
+
+	return err
+}
+
 func FindByUID(uid string, collection *mgo.Collection) (interface{}, error) {
 
 	var result interface{}

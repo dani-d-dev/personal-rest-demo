@@ -133,22 +133,13 @@ func TeamAsk(w http.ResponseWriter, r *http.Request) {
 
 	teamId := mux.Vars(r)["id"]
 
-	_, er := FindByID(teamId, teamCollection)
+	var team Team
+	er := FindEntityByID(teamId, teamCollection, &team)
 
 	if er != nil {
 		ErrorWithJSON(w, "Team not found", http.StatusNotFound)
 		return
 	}
-
-	var team Team
-	err := json.NewDecoder(r.Body).Decode(&team)
-
-	if err != nil {
-		ErrorWithJSON(w, "Parsing error", http.StatusNotAcceptable)
-		return
-	}
-
-	defer r.Body.Close()
 
 	// Check if userId already exists before adding it
 
