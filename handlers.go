@@ -129,6 +129,46 @@ func TeamJoin(w http.ResponseWriter, r *http.Request) {
 	ResponseWithJSON(w, team, http.StatusOK)
 }
 
+func TeamAsk(w http.ResponseWriter, r *http.Request) {
+
+	teamId := mux.Vars(r)["id"]
+
+	_, er := FindByID(teamId, teamCollection)
+
+	if er != nil {
+		ErrorWithJSON(w, "Team not found", http.StatusNotFound)
+		return
+	}
+
+	var team Team
+	err := json.NewDecoder(r.Body).Decode(&team)
+
+	if err != nil {
+		ErrorWithJSON(w, "Parsing error", http.StatusNotAcceptable)
+		return
+	}
+
+	defer r.Body.Close()
+
+	// Check if userId already exists before adding it
+
+	for _, s := range team.JoinRequests {
+		if s == teamId {
+			ErrorWithJSON(w, "The provided user id was already requested", http.StatusNotAcceptable)
+			return
+		}
+	}
+
+	// Update team by adding player id to pending join requests
+
+	joinRequests := append(team.JoinRequests, teamId)
+	team.JoinRequests = joinRequests
+
+	teamCollection.UpdateId(teamId, team)
+
+	ResponseWithJSON(w, team, http.StatusOK)
+}
+
 // Message CRUD
 
 func MessageList(w http.ResponseWriter, _ *http.Request) {

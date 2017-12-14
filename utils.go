@@ -14,7 +14,7 @@ import (
 
 func port() string {
 
-	// os.Setenv("PORT", "5050")
+	os.Setenv("PORT", "5050")
 
 	port := os.Getenv("PORT")
 
@@ -28,7 +28,7 @@ func port() string {
 
 func mongoURL() string {
 
-	// os.Setenv("MONGO_URL", "mongodb://mlab-dani:dani1234@ds117935.mlab.com:17935/godata")
+	os.Setenv("MONGO_URL", "mongodb://mlab-dani:dani1234@ds117935.mlab.com:17935/godata")
 
 	url := os.Getenv("MONGO_URL")
 
