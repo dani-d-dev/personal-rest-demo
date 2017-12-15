@@ -176,6 +176,45 @@ func TeamAsk(w http.ResponseWriter, r *http.Request) {
 
 // Message CRUD
 
+func MessageUpdate(w http.ResponseWriter, r *http.Request) {
+
+	msgId := mux.Vars(r)["id"]
+
+	err := FindByID(msgId, messageCollection, nil)
+
+	if err != nil {
+		ErrorWithJSON(w, "Message not found", http.StatusNotFound)
+		return
+	}
+
+	var message Message
+	err = json.NewDecoder(r.Body).Decode(&message)
+
+	if err != nil {
+		ErrorWithJSON(w, "Failed decoding json into object", http.StatusNotAcceptable)
+		return
+	}
+
+	defer r.Body.Close()
+
+	oid := bson.ObjectIdHex(msgId)
+	err = messageCollection.Update(bson.M{"_id": oid}, bson.M{"$set": message})
+
+	if err != nil {
+		switch err {
+		default:
+			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+			log.Println("Failed updating message: ", err)
+			return
+		case mgo.ErrNotFound:
+			ErrorWithJSON(w, "Record not found", http.StatusNotFound)
+			return
+		}
+	}
+
+	ResponseWithJSON(w, message, http.StatusOK)
+}
+
 func MessageList(w http.ResponseWriter, r *http.Request) {
 
 	userId := mux.Vars(r)["id"]
