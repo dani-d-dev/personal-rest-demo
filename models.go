@@ -26,7 +26,7 @@ type Player struct {
 type Players []Player
 
 type Match struct {
-	ID       bson.ObjectId `json:"id" bson:"_id"`
+	ID       bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
 	StarTime time.Time     `json:"start_time" bson:"start_time"`
 	EndTime  time.Time     `json:"end_time" bson:"end_time"`
 	Player1  string        `json:"player_1" bson:"player_1"`
@@ -39,7 +39,7 @@ type Match struct {
 type matches []Match
 
 type Team struct {
-	ID           bson.ObjectId `json:"id" bson:"_id"`
+	ID           bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
 	Name         string        `json:"name"`
 	City         string        `json:"city"`
 	Description  string        `json:"description"`
@@ -50,7 +50,7 @@ type Team struct {
 type Teams []Team
 
 type Message struct {
-	ID         bson.ObjectId `json:"id" bson:"_id"`
+	ID         bson.ObjectId `json:"id,omitempty" bson:"_id,omitempty"`
 	SenderID   string        `json:"sender_id" bson:"sender_id"`
 	ReceiverID string        `json:"receiver_id" bson:"receiver_id"`
 	Text       string        `json:"text"`
