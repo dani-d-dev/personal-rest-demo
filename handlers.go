@@ -41,7 +41,7 @@ func TeamList(w http.ResponseWriter, _ *http.Request) {
 
 	var teams Teams
 
-	err := FindAll(teamCollection, &teams)
+	err := FindAll(nil, teamCollection, &teams)
 
 	if err != nil || len(teams) == 0 {
 		ErrorWithJSON(w, "Teams not found", http.StatusNotFound)
@@ -176,10 +176,19 @@ func TeamAsk(w http.ResponseWriter, r *http.Request) {
 
 // Message CRUD
 
-func MessageList(w http.ResponseWriter, _ *http.Request) {
+func MessageList(w http.ResponseWriter, r *http.Request) {
+
+	userId := mux.Vars(r)["id"]
+
+	if !userExists(userId) {
+		ErrorWithJSON(w, "The provided user id was not found, check if user exists", http.StatusNotFound)
+		return
+	}
+
+	// TODO : Fetch user messages
 
 	var messages Messages
-	err := FindAll(messageCollection, &messages)
+	err := FindAll(bson.M{"receiver_id": userId}, messageCollection, &messages)
 
 	if err != nil || len(messages) == 0 {
 		ErrorWithJSON(w, "Messages not found", http.StatusNotFound)
@@ -224,7 +233,7 @@ func MessageSend(w http.ResponseWriter, r *http.Request) {
 func PlayersList(w http.ResponseWriter, _ *http.Request) {
 
 	var players Players
-	err := FindAll(playerCollection, &players)
+	err := FindAll(nil, playerCollection, &players)
 
 	if err != nil || len(players) == 0 {
 		ErrorWithJSON(w, "Players not found", http.StatusNotFound)
@@ -343,7 +352,7 @@ func PlayerDelete(w http.ResponseWriter, r *http.Request) {
 func MatchList(w http.ResponseWriter, _ *http.Request) {
 
 	var matches []Match
-	err := FindAll(matchCollection, &matches)
+	err := FindAll(nil, matchCollection, &matches)
 
 	if err != nil || len(matches) == 0 {
 		ErrorWithJSON(w, "Matches not found", http.StatusNotFound)
