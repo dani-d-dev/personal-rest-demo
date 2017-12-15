@@ -45,6 +45,7 @@ func main() {
 	api.HandleFunc("/team/{id}/ask/{uid}", TeamAsk).Methods("POST")
 	api.HandleFunc("/message/{id}/all", MessageList).Methods("GET")
 	api.HandleFunc("/message/send/{id}", MessageSend).Methods("POST")
+	api.HandleFunc("/message/{id}", MessageUpdate).Methods("POST")
 
 	router.PathPrefix("/api").Handler(negroni.New(
 		negroni.HandlerFunc(AuthMiddleware),
