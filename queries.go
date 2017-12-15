@@ -7,9 +7,9 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func FindAll(collection *mgo.Collection, result interface{}) error {
+func FindAll(query bson.M, collection *mgo.Collection, result interface{}) error {
 
-	return collection.Find(nil).Sort("-_id").All(result)
+	return collection.Find(query).Sort("-_id").All(result)
 }
 
 func FindByID(id string, collection *mgo.Collection, result interface{}) error {
